@@ -1,0 +1,49 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Clean Pico-Assistant build folder",
+            "type": "shell",
+            "command": "rm -rf build",
+            "options": {
+                "cwd": "/home/sriram/Developer/Pico-Assistant"
+            },
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
+        },
+        {
+            "label": "Build Pico-Assistant",
+            "type": "shell",
+            "command": "mkdir -p build && cd build && cmake -DPICO_BOARD=pico -DPICO_PLATFORM=rp2040 .. && make",
+            "options": {
+                "cwd": "/home/sriram/Developer/Pico-Assistant"
+            },
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Copy Pico binary to RPI-RP2",
+            "type": "shell",
+            "command": "cp /home/sriram/Developer/Pico-Assistant/build/app.uf2 /media/sriram/RPI-RP2/",
+            "problemMatcher": [],
+            "group": "none"
+        },
+        {
+            "label": "Rebuild and Flash Pico-Assistant",
+            "dependsOn": [
+                "Clean Pico-Assistant build folder",
+                "Build Pico-Assistant",
+                "Copy Pico binary to RPI-RP2"
+            ],
+            "dependsOrder": "sequence"
+        }
+    ]
+}

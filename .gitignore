@@ -40,3 +40,9 @@
 # debug information files
 *.dwo
 build
+
+data_set_generator/bin/
+data_set_generator/include/
+data_set_generator/lib/
+data_set_generator/lib64/
+data_set_generator/pyvenv.cfg

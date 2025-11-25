@@ -8,7 +8,7 @@
             "type": "shell",
             "command": "rm -rf build",
             "options": {
-                "cwd": "/home/sriram/Developer/Pico-Assistant"
+                "cwd": "/Users/sriramyadavalli/Developer/Pico-Assistant"
             },
             "problemMatcher": [],
             "group": {
@@ -21,7 +21,7 @@
             "type": "shell",
             "command": "mkdir -p build && cd build && cmake -DPICO_BOARD=pico -DPICO_PLATFORM=rp2040 .. && make",
             "options": {
-                "cwd": "/home/sriram/Developer/Pico-Assistant"
+                "cwd": "/Users/sriramyadavalli/Developer/Pico-Assistant"
             },
             "problemMatcher": [],
             "group": {
@@ -32,7 +32,7 @@
         {
             "label": "Copy Pico binary to RPI-RP2",
             "type": "shell",
-            "command": "cp /home/sriram/Developer/Pico-Assistant/build/app.uf2 /media/sriram/RPI-RP2/",
+            "command": "cp /Users/sriramyadavalli/Developer/Pico-Assistant/build/app.uf2 /media/sriram/RPI-RP2/",
             "problemMatcher": [],
             "group": "none"
         },

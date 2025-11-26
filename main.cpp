@@ -21,7 +21,7 @@ uint8_t predict_humidity();
 
 int main()
 {
-    const std::string speechCommand = "what is the temperature";
+    const std::string speechCommand = "what is the humidity";
     const uint8_t res = get_command_result(parse_command(speechCommand));
 
     std::cout << "The result is: " << static_cast<int>(res) << std::endl;
@@ -92,7 +92,7 @@ uint8_t read_temperature()
 
 uint8_t read_humidity()
 {
-    return 100;
+    return 50;
 }
 
 uint8_t predict_temperature()

@@ -53,3 +53,5 @@ voice_model/jupyter-1.0.0
 voice_model/lib/python3.12/site-packages
 voice_model/share
 voice_model/jupyter.tar.gz
+
+.DS_Store

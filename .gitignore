@@ -46,3 +46,10 @@ data_set_generator/include/
 data_set_generator/lib/
 data_set_generator/lib64/
 data_set_generator/pyvenv.cfg
+voice_model/bin
+voice_model/etc
+voice_model/include/python3.12
+voice_model/jupyter-1.0.0
+voice_model/lib/python3.12/site-packages
+voice_model/share
+voice_model/jupyter.tar.gz

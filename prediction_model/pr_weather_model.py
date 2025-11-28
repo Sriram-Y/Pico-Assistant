@@ -57,11 +57,11 @@ def create_polynomial_model():
 # 4. Train
 print("\n--- Training Temperature Model ---")
 temp_model = create_polynomial_model()
-temp_model.fit(X_train, y_temp_train, epochs=2, batch_size=64, verbose=0)
+temp_model.fit(X_train, y_temp_train, epochs=10, batch_size=10, verbose=0)
 
 print("\n--- Training Humidity Model ---")
 hum_model = create_polynomial_model()
-hum_model.fit(X_train, y_hum_train, epochs=2, batch_size=64, verbose=0)
+hum_model.fit(X_train, y_hum_train, epochs=10, batch_size=10, verbose=0)
 
 # 5. Convert using Concrete Functions (THE FIX)
 def convert_via_concrete_function(model, filename):

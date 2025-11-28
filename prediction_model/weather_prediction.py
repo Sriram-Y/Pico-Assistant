@@ -55,7 +55,7 @@ def main():
     
     # 3. Define Test Input
     # Using the first row of your provided data
-    test_timestamp = "2025-09-05 20:47:48"
+    test_timestamp = "2025-11-27 10:21:48"
     print(f"\n--- Inference Request ---")
     print(f"Input Timestamp: {test_timestamp}")
     

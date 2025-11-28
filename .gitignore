@@ -55,3 +55,7 @@ voice_model/share
 voice_model/jupyter.tar.gz
 
 .DS_Store
+prediction_model/bin
+prediction_model/include
+prediction_model/lib
+prediction_model/pyvenv.cfg

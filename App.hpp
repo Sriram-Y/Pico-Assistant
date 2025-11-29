@@ -6,7 +6,11 @@
 #include <cstdint>
 #include <memory>
 #include <pigpio.h>
+#include <chrono>
+#include <iostream>
+#include <ctime>
 
+#include "TFInference/WeatherInference.hpp"
 #include "RPI3B_HW_LIB/ReadSensor.hpp"
 
 class App
@@ -24,6 +28,14 @@ public:
     bool predict_temperature();
     bool predict_humidity();
 
+    std::string get_time_tomorrow();
+
     uint8_t temperature_;
     uint8_t humidity_;
+
+    const std::string TEMP_MODEL_PATH = "temperature_model.tflite";
+    const std::string HUM_MODEL_PATH = "humidity_model.tflite";
+
+    std::unique_ptr<WeatherInference> temperatureInference_ = std::make_unique<WeatherInference>(TEMP_MODEL_PATH);
+    std::unique_ptr<WeatherInference> humidityInference_ = std::make_unique<WeatherInference>(HUM_MODEL_PATH);
 };

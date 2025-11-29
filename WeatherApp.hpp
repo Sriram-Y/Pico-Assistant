@@ -21,7 +21,7 @@
 #define READ_HUM_CMD 3
 #define INVALID_CMD 255
 
-class App
+class WeatherApp
 {
 public:
     // Command utilities

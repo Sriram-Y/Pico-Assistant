@@ -1,16 +1,14 @@
-# Makefile (fixed example)
 CXX = g++
-CXXFLAGS = -std=c++17 -Wall -g -I. # Add -I. to include current dir in search path
+CXXFLAGS = -std=c++17 -Wall -g -I.
 LDFLAGS = -lpigpio -ltensorflow-lite -ldl -lpthread
 
-# List all your object files
-OBJS = App.o RPI3B_HW_LIB/ReadSensor.o TFInference/WeatherInference.o
+OBJS = WeatherApp.o RPI3B_HW_LIB/ReadSensor.o TFInference/WeatherInference.o
 
-app: $(OBJS)
-	$(CXX) $(CXXFLAGS) -o app $(OBJS) $(LDFLAGS)
+WeatherApp: $(OBJS)
+	$(CXX) $(CXXFLAGS) -o WeatherApp $(OBJS) $(LDFLAGS)
 
-App.o: App.cpp App.hpp RPI3B_HW_LIB/ReadSensor.hpp
-	$(CXX) $(CXXFLAGS) -c App.cpp
+WeatherApp.o: WeatherApp.cpp WeatherApp.hpp RPI3B_HW_LIB/ReadSensor.hpp
+	$(CXX) $(CXXFLAGS) -c WeatherApp.cpp
 
 RPI3B_HW_LIB/ReadSensor.o: RPI3B_HW_LIB/ReadSensor.cpp RPI3B_HW_LIB/ReadSensor.hpp
 	$(CXX) $(CXXFLAGS) -c RPI3B_HW_LIB/ReadSensor.cpp -o RPI3B_HW_LIB/ReadSensor.o
@@ -19,11 +17,8 @@ TFInference/WeatherInference.o: TFInference/WeatherInference.cpp TFInference/Wea
 	$(CXX) $(CXXFLAGS) -c TFInference/WeatherInference.cpp -o TFInference/WeatherInference.o
 
 clean:
-	rm -f App.o RPI3B_HW_LIB/ReadSensor.o TFInference/WeatherInference.o app
+	rm -f WeatherApp.o RPI3B_HW_LIB/ReadSensor.o TFInference/WeatherInference.o WeatherApp
 
-
-# scp transfer main.cpp, Makefile, RPI3B_HW_LIB (whole directory)
-# to dev@192.168.68.105:/home/dev/Pico-Assistant/
 transfer:
-	scp -r App.cpp App.hpp Makefile RPI3B_HW_LIB TFInference prediction_model/*.tflite prediction_model/*.keras prediction_model/*.pkl no_voice_app_test.sh dev@192.168.68.105:/home/dev/Pico-Assistant/
+	scp -r WeatherApp.cpp WeatherApp.hpp Makefile RPI3B_HW_LIB TFInference prediction_model/*.tflite prediction_model/*.keras prediction_model/*.pkl ./weather_app_test.sh dev@192.168.68.105:/home/dev/Pico-Assistant/
 	

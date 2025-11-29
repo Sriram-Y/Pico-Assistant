@@ -1,4 +1,4 @@
-#include "App.hpp"
+#include "WeatherApp.hpp"
 
 int main(int argc, char *argv[])
 {
@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
     }
 
     const std::string speechCommand = argv[1];
-    std::unique_ptr<App> app = std::make_unique<App>();
+    std::unique_ptr<WeatherApp> app = std::make_unique<WeatherApp>();
     const bool res = app->get_command_result(app->parse_command(speechCommand));
 
     if (!res)
@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-bool App::get_command_result(uint8_t cmd)
+bool WeatherApp::get_command_result(uint8_t cmd)
 {
     bool res = false;
     std::string ts = get_time_tomorrow();
@@ -85,7 +85,7 @@ bool App::get_command_result(uint8_t cmd)
     return res;
 }
 
-uint8_t App::parse_command(std::string speechCommand)
+uint8_t WeatherApp::parse_command(std::string speechCommand)
 {
     // if "tomorrow" & "temperature" is in the string return 0
     // if "tomorrow" & "humidity" is in the string return 1
@@ -116,7 +116,7 @@ uint8_t App::parse_command(std::string speechCommand)
     }
 }
 
-bool App::read_temperature()
+bool WeatherApp::read_temperature()
 {
     std::unique_ptr<ReadSensor> sensor = std::make_unique<ReadSensor>(GPIO_PIN);
     if (!sensor->read())
@@ -128,7 +128,7 @@ bool App::read_temperature()
     return true;
 }
 
-bool App::read_humidity()
+bool WeatherApp::read_humidity()
 {
     std::unique_ptr<ReadSensor> sensor = std::make_unique<ReadSensor>(GPIO_PIN);
 
@@ -141,7 +141,7 @@ bool App::read_humidity()
     return true;
 }
 
-bool App::predict_temperature()
+bool WeatherApp::predict_temperature()
 {   
     const std::string ts = get_time_tomorrow();
 
@@ -149,7 +149,7 @@ bool App::predict_temperature()
     return true;
 }
 
-bool App::predict_humidity()
+bool WeatherApp::predict_humidity()
 {
     const std::string ts = get_time_tomorrow();
 
@@ -157,7 +157,7 @@ bool App::predict_humidity()
     return true;
 }
 
-std::string App::get_time_tomorrow()
+std::string WeatherApp::get_time_tomorrow()
 {
     auto now = std::chrono::system_clock::now();
     auto tomorrow = now + std::chrono::hours(24);

@@ -31,12 +31,12 @@ bool App::get_command_result(uint8_t cmd)
     {
     case 0:
         res = predict_temperature();
-        std::cout << "Tempearture at " << ts << " will be: " << static_cast<int>(temperature_) << " C" << std::endl;
+        std::cout << "Tempearture on " << ts << " will be: " << static_cast<int>(temperature_) << " C" << std::endl;
 
         break;
     case 1:
         res = predict_humidity();
-        std::cout << "Humidity at " << ts << " will be: " << static_cast<int>(humidity_) << " %" << std::endl;
+        std::cout << "Humidity on " << ts << " will be: " << static_cast<int>(humidity_) << " %" << std::endl;
 
         break;
     case 2:

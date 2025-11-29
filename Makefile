@@ -25,5 +25,5 @@ clean:
 # scp transfer main.cpp, Makefile, RPI3B_HW_LIB (whole directory)
 # to dev@192.168.68.105:/home/dev/Pico-Assistant/
 transfer:
-	scp -r App.cpp App.hpp Makefile RPI3B_HW_LIB TFInference prediction_model/*.tflite prediction_model/*.keras prediction_model/*.pkl dev@192.168.68.105:/home/dev/Pico-Assistant/
+	scp -r App.cpp App.hpp Makefile RPI3B_HW_LIB TFInference prediction_model/*.tflite prediction_model/*.keras prediction_model/*.pkl no_voice_app_test.sh dev@192.168.68.105:/home/dev/Pico-Assistant/
 	

@@ -13,6 +13,14 @@
 #include "TFInference/WeatherInference.hpp"
 #include "RPI3B_HW_LIB/ReadSensor.hpp"
 
+#define GPIO_PIN 4
+
+#define PREDICT_TEMP_CMD 0
+#define PREDICT_HUM_CMD 1
+#define READ_TEMP_CMD 2
+#define READ_HUM_CMD 3
+#define INVALID_CMD 255
+
 class App
 {
 public:

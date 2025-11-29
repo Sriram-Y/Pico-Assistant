@@ -1,17 +1,21 @@
 #include "App.hpp"
 
-#define GPIO_PIN 4
-
-int main()
+int main(int argc, char *argv[])
 {
+    if (argc < 2)
+    {
+        std::cerr << "Usage: " << argv[0] << " \"<speech command>\"" << std::endl;
+        return 1;
+    }
+
     if (gpioInitialise() < 0)
     {
         std::cerr << "Failed to init pigpio\n";
         return 1;
     }
 
+    const std::string speechCommand = argv[1];
     std::unique_ptr<App> app = std::make_unique<App>();
-    const std::string speechCommand = "what will the temperature be tomorrow";
     const bool res = app->get_command_result(app->parse_command(speechCommand));
 
     if (!res)
@@ -29,29 +33,52 @@ bool App::get_command_result(uint8_t cmd)
     std::string ts = get_time_tomorrow();
     switch (cmd)
     {
-    case 0:
+    case PREDICT_TEMP_CMD:
         res = predict_temperature();
+        if (!res)
+        {
+            std::cout << "Failed to predict temperature!" << std::endl;
+            return false;
+        }
+
         std::cout << "Tempearture on " << ts << " will be: " << static_cast<int>(temperature_) << " C" << std::endl;
 
         break;
-    case 1:
+    case PREDICT_HUM_CMD:
         res = predict_humidity();
+        if (!res)
+        {
+            std::cout << "Failed to predict humidity!" << std::endl;
+            return false;
+        }
+
         std::cout << "Humidity on " << ts << " will be: " << static_cast<int>(humidity_) << " %" << std::endl;
 
         break;
-    case 2:
+    case READ_TEMP_CMD:
         res = read_temperature();
+        if (!res)
+        {
+            std::cout << "Failed to read temperature!" << std::endl;
+            return false;
+        }
+
         std::cout << "Temperature: " << static_cast<int>(temperature_) << " C" << std::endl;
 
         break;
-    case 3:
+    case READ_HUM_CMD:
         res = read_humidity();
+        if (!res)
+        {
+            std::cout << "Failed to read humidity!" << std::endl;
+            return false;
+        }
+
         std::cout << "Humidity: " << static_cast<int>(humidity_) << " %" << std::endl;
 
         break;
     default:
         std::cout << "Unrecognized command or no command" << std::endl;
-
         break;
     }
 
@@ -68,24 +95,24 @@ uint8_t App::parse_command(std::string speechCommand)
     if (speechCommand.find("tomorrow") != std::string::npos &&
         speechCommand.find("temperature") != std::string::npos)
     {
-        return 0;
+        return PREDICT_TEMP_CMD;
     }
     else if (speechCommand.find("tomorrow") != std::string::npos &&
              speechCommand.find("humidity") != std::string::npos)
     {
-        return 1;
+        return PREDICT_HUM_CMD;
     }
     else if (speechCommand.find("temperature") != std::string::npos)
     {
-        return 2;
+        return READ_TEMP_CMD;
     }
     else if (speechCommand.find("humidity") != std::string::npos)
     {
-        return 3;
+        return READ_HUM_CMD;
     }
     else
     {
-        return 255;
+        return INVALID_CMD;
     }
 }
 

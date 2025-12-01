@@ -9,11 +9,14 @@
 #include <chrono>
 #include <iostream>
 #include <ctime>
+#include <alsa/asoundlib.h>
 
 #include "TFInference/VoiceInference.hpp"
+#include "RPI3B_HW_LIB/RecordAudio.hpp"
+#include "RPI3B_HW_LIB/TerminalControl.hpp"
 
 class VoiceApp
 {
 public:
-    bool placeholder_function();
+    
 };

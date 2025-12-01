@@ -8,7 +8,7 @@
 
 #include "tensorflow/lite/kernels/register.h"
 
-VoiceInference::VoiceInference(const std::string &model_path)
+VoiceInference::VoiceInference(const std::string &model_path, const std::string wav_path)
 {
     std::cout << "Loading model from: " << model_path << std::endl;
 }

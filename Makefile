@@ -1,6 +1,6 @@
 CXX = g++
 CXXFLAGS = -std=c++17 -Wall -g -I.
-LDFLAGS = -lpigpio -ltensorflow-lite -lasound -lsndfile -ldl -lpthread
+LDFLAGS = -lpigpio -ltensorflow-lite -lasound -lsndfile -ldl -lpthread -ldeepspeech
 
 WEATHEROBJS = WeatherApp.o RPI3B_HW_LIB/ReadSensor.o TFInference/WeatherInference.o
 VOICEOBJS = VoiceApp.o RPI3B_HW_LIB/RecordAudio.o RPI3B_HW_LIB/TerminalControl.o TFInference/VoiceInference.o
@@ -39,6 +39,9 @@ clean:
 
 # FIXME: Maybe missing: voice_model/*.keras voice_model/*.pkl
 transfer:
-	scp -r WeatherApp.cpp WeatherApp.hpp Makefile RPI3B_HW_LIB TFInference prediction_model/*.tflite prediction_model/*.keras prediction_model/*.pkl ./weather_app_test.sh dev@192.168.1.34:/home/dev/Pico-Assistant/
-	scp -r VoiceApp.cpp VoiceApp.hpp voice_model/*.tflite dev@192.168.1.34:/home/dev/Pico-Assistant/
+	scp -r WeatherApp.cpp WeatherApp.hpp Makefile RPI3B_HW_LIB TFInference ./weather_app_test.sh dev@192.168.1.34:/home/dev/Pico-Assistant/
+	scp -r VoiceApp.cpp VoiceApp.hpp dev@192.168.1.34:/home/dev/Pico-Assistant/
+
+transfer_tf_only:
+	scp -r voice_model/*.tflite voice_model/*.scorer prediction_model/*.tflite prediction_model/*.keras prediction_model/*.pkl
 	

@@ -13,7 +13,7 @@ public:
     // Call this before asking the user to start to ensure instant start.
     bool initialize(const std::string& filename, 
                    const std::string& device = "default", 
-                   unsigned int sampleRate = 44100, 
+                   unsigned int sampleRate = 16000, 
                    int channels = 1);
 
     // Prepares the ALSA handle for immediate capture.

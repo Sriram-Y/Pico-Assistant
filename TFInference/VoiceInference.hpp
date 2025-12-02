@@ -1,16 +1,26 @@
-#pragma once
-
+#include <iostream>
 #include <string>
-#include <memory>
+#include <vector>
+#include <stdexcept>
 
-#include "tensorflow/lite/interpreter.h"
-#include "tensorflow/lite/kernels/register.h"
-#include "tensorflow/lite/model.h"
+// DeepSpeech Header
+#include "deepspeech.h"
+
+// SndFile Header
+#include <sndfile.h>
 
 class VoiceInference
 {
-public:
-    VoiceInference(const std::string &model_path, const std::string wav_path);
+private:
+    ModelState *modelCtx = nullptr;
 
-    float predict(float input_value);
+public:
+    // Constructor: Loads the model and optional scorer
+    VoiceInference(const std::string &modelPath, const std::string &scorerPath);
+
+    // Destructor: Cleans up DeepSpeech memory
+    ~VoiceInference();
+
+    // Main inference function
+    std::string infer(const std::string &wavPath);
 };

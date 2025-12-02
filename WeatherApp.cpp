@@ -92,6 +92,9 @@ uint8_t WeatherApp::parse_command(std::string speechCommand)
     // if "temperature" found in speechCommand return 2
     // if "humidity" found in speechCommand return 3
 
+    // removing spaces for better accuracy?
+    speechCommand.erase(std::remove(speechCommand.begin(), speechCommand.end(), ' '), speechCommand.end());
+
     if (speechCommand.find("tomorrow") != std::string::npos &&
         speechCommand.find("temperature") != std::string::npos)
     {

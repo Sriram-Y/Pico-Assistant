@@ -1,3 +1,8 @@
+# The remote host in the format username@ip_address
+REMOTE_HOST = dev@192.168.1.34
+# The remote path where the application source code lives
+REMOTE_PATH = /home/dev/Pico-Assistant/
+
 CXX = g++
 CXXFLAGS = -std=c++17 -Wall -g -I.
 LDFLAGS = -lpigpio -ltensorflow-lite -lasound -lsndfile -ldl -lpthread -ldeepspeech
@@ -37,11 +42,9 @@ TFInference/VoiceInference.o: TFInference/VoiceInference.cpp TFInference/VoiceIn
 clean:
 	rm -f WeatherApp.o VoiceApp.o RPI3B_HW_LIB/*.o TFInference/*.o WeatherApp VoiceApp
 
-# FIXME: Maybe missing: voice_model/*.keras voice_model/*.pkl
 transfer:
-	scp -r WeatherApp.cpp WeatherApp.hpp Makefile RPI3B_HW_LIB TFInference ./weather_app_test.sh dev@192.168.1.34:/home/dev/Pico-Assistant/
-	scp -r VoiceApp.cpp dev@192.168.1.34:/home/dev/Pico-Assistant/
+	scp -r WeatherApp.cpp WeatherApp.hpp Makefile RPI3B_HW_LIB TFInference ./weather_app_test.sh $(REMOTE_HOST):$(REMOTE_PATH)
+	scp -r VoiceApp.cpp $(REMOTE_HOST):$(REMOTE_PATH)
 
 transfer_tf_only:
-	scp -r voice_model/*.tflite voice_model/*.scorer prediction_model/*.tflite prediction_model/*.keras prediction_model/*.pkl
-	
+	scp -r voice_model/*.tflite voice_model/*.scorer prediction_model/*.tflite prediction_model/*.keras prediction_model/*.pkl $(REMOTE_HOST):$(REMOTE_PATH)

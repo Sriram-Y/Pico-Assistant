@@ -80,12 +80,12 @@ bool ReadSensor::readRawData(uint8_t data[5])
     // Read the 40 bits
     for (int i = 0; i < 40; i++)
     {
-        while (gpioRead(pin) == PI_OFF)
-            ;
+        while (gpioRead(pin) == PI_OFF);
 
         uint32_t t = gpioTick();
-        while (gpioRead(pin) == PI_ON)
-            ;
+        
+        while (gpioRead(pin) == PI_ON);
+
         uint32_t duration = gpioTick() - t;
 
         int byteIdx = i / 8;

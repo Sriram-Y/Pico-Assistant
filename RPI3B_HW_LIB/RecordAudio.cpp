@@ -2,132 +2,148 @@
 
 #include <iostream>
 #include <cstring>
+#include <vector>
 
-RecordAudio::RecordAudio() 
-    : m_pcmHandle(nullptr), m_buffer(nullptr), m_sndFile(nullptr), 
-      m_totalFramesWritten(0), m_initialized(false), m_recording(false),
-      m_latencyUs(20000) // 20ms latency target
+RecordAudio::RecordAudio()
+    : isInitialized(false), isRecording(false)
 {
+    config.latencyUs = 20000;
+    config.sampleRate = 0;
+    config.channels = 0;
 }
 
-RecordAudio::~RecordAudio() {
+RecordAudio::~RecordAudio()
+{
     cleanup();
 }
 
-bool RecordAudio::initialize(const std::string& filename, const std::string& device, unsigned int sampleRate, int channels) {
-    if (m_initialized) cleanup(); // Safety reset
+bool RecordAudio::initialize(const std::string &filename, const std::string &device, unsigned int sampleRate, int channels)
+{
+    if (isInitialized)
+    {
+        cleanup();
+    }
 
-    m_sampleRate = sampleRate;
-    m_channels = channels;
+    config.sampleRate = sampleRate;
+    config.channels = channels;
+    
     int rc;
     int dir;
-    unsigned int val = m_sampleRate;
+    unsigned int val = config.sampleRate;
 
-    // 1. Open ALSA PCM device
-    rc = snd_pcm_open(&m_pcmHandle, device.c_str(), SND_PCM_STREAM_CAPTURE, 0);
-    if (rc < 0) {
+    // open pcm device for recording
+    rc = snd_pcm_open(&alsa.handle, device.c_str(), SND_PCM_STREAM_CAPTURE, 0);
+    if (rc < 0)
+    {
         std::cerr << "[RecordAudio] Unable to open pcm device: " << snd_strerror(rc) << std::endl;
         return false;
     }
 
-    // 2. Configure Hardware Parameters
+    // alsa parameters
     snd_pcm_hw_params_t *params;
     snd_pcm_hw_params_alloca(&params);
-    snd_pcm_hw_params_any(m_pcmHandle, params);
+    snd_pcm_hw_params_any(alsa.handle, params);
 
-    snd_pcm_hw_params_set_access(m_pcmHandle, params, SND_PCM_ACCESS_RW_INTERLEAVED);
-    snd_pcm_hw_params_set_format(m_pcmHandle, params, SND_PCM_FORMAT_S16_LE);
-    snd_pcm_hw_params_set_channels(m_pcmHandle, params, m_channels);
-    snd_pcm_hw_params_set_rate_near(m_pcmHandle, params, &val, &dir);
+    snd_pcm_hw_params_set_access(alsa.handle, params, SND_PCM_ACCESS_RW_INTERLEAVED);
+    snd_pcm_hw_params_set_format(alsa.handle, params, SND_PCM_FORMAT_S16_LE);
+    snd_pcm_hw_params_set_channels(alsa.handle, params, config.channels);
+    snd_pcm_hw_params_set_rate_near(alsa.handle, params, &val, &dir);
 
-    // Set period time to ~20ms for low latency responsiveness
-    unsigned int periodTime = m_latencyUs;
-    snd_pcm_hw_params_set_period_time_near(m_pcmHandle, params, &periodTime, &dir);
+    unsigned int periodTime = config.latencyUs;
+    snd_pcm_hw_params_set_period_time_near(alsa.handle, params, &periodTime, &dir);
 
-    rc = snd_pcm_hw_params(m_pcmHandle, params);
-    if (rc < 0) {
+    rc = snd_pcm_hw_params(alsa.handle, params);
+    if (rc < 0)
+    {
         std::cerr << "[RecordAudio] Unable to set hw parameters: " << snd_strerror(rc) << std::endl;
         return false;
     }
 
-    // 3. Allocate Buffer
-    snd_pcm_hw_params_get_period_size(params, &m_framesPerPeriod, &dir);
-    m_bufferSize = m_framesPerPeriod * m_channels * 2; // 2 bytes per sample (S16)
-    m_buffer = (char *) malloc(m_bufferSize);
+    snd_pcm_hw_params_get_period_size(params, &alsa.framesPerPeriod, &dir);
+    alsa.bufferSize = alsa.framesPerPeriod * config.channels * 2; // 2 bytes per sample
+    alsa.buffer = (char *)malloc(alsa.bufferSize);
 
-    // 4. Open Output File (libsndfile)
-    memset(&m_sfInfo, 0, sizeof(m_sfInfo));
-    m_sfInfo.samplerate = m_sampleRate;
-    m_sfInfo.channels = m_channels;
-    m_sfInfo.format = SF_FORMAT_WAV | SF_FORMAT_PCM_16;
+    memset(&file.info, 0, sizeof(file.info));
+    file.info.samplerate = config.sampleRate;
+    file.info.channels = config.channels;
+    file.info.format = SF_FORMAT_WAV | SF_FORMAT_PCM_16;
 
-    m_sndFile = sf_open(filename.c_str(), SFM_WRITE, &m_sfInfo);
-    if (!m_sndFile) {
-        std::cerr << "[RecordAudio] Error opening output file: " << sf_strerror(m_sndFile) << std::endl;
+    file.handle = sf_open(filename.c_str(), SFM_WRITE, &file.info);
+    if (!file.handle)
+    {
+        std::cerr << "[RecordAudio] Error opening output file: " << sf_strerror(file.handle) << std::endl;
         return false;
     }
 
-    m_initialized = true;
+    isInitialized = true;
     return true;
 }
 
-void RecordAudio::start() {
-    if (m_initialized && m_pcmHandle) {
-        snd_pcm_prepare(m_pcmHandle);
-        m_recording = true;
+void RecordAudio::start()
+{
+    if (isInitialized && alsa.handle)
+    {
+        snd_pcm_prepare(alsa.handle);
+        isRecording = true;
     }
 }
 
-bool RecordAudio::processLoop() {
-    if (!m_initialized || !m_recording) return false;
+bool RecordAudio::processLoop()
+{
+    if (!isInitialized || !isRecording)
+        return false;
 
-    // A. Read from ALSA (Blocks for ~20ms)
-    int rc = snd_pcm_readi(m_pcmHandle, m_buffer, m_framesPerPeriod);
+    int rc = snd_pcm_readi(alsa.handle, alsa.buffer, alsa.framesPerPeriod);
 
-    if (rc == -EPIPE) {
+    if (rc == -EPIPE)
+    {
         // Overrun (Buffer full)
-        snd_pcm_prepare(m_pcmHandle);
+        snd_pcm_prepare(alsa.handle);
         return true; // Recovered, continue
-    } else if (rc < 0) {
+    }
+    else if (rc < 0)
+    {
         std::cerr << "[RecordAudio] Read error: " << snd_strerror(rc) << std::endl;
         return false;
     }
 
-    // B. Write to File
-    if (rc > 0) {
-        sf_write_short(m_sndFile, (short*)m_buffer, rc * m_channels);
-        m_totalFramesWritten += rc;
+    if (rc > 0)
+    {
+        sf_write_short(file.handle, (short *)alsa.buffer, rc * config.channels);
+        file.totalFramesWritten += rc;
     }
 
     return true;
 }
 
-void RecordAudio::stop() {
-    if (m_recording && m_pcmHandle) {
+void RecordAudio::stop()
+{
+    if (isRecording && alsa.handle)
+    {
         // Immediate drop (don't wait for drain)
-        snd_pcm_drop(m_pcmHandle);
-        m_recording = false;
+        snd_pcm_drop(alsa.handle);
+        isRecording = false;
     }
     cleanup();
 }
 
-sf_count_t RecordAudio::getTotalFrames() const {
-    return m_totalFramesWritten;
-}
-
-void RecordAudio::cleanup() {
-    if (m_sndFile) {
-        sf_close(m_sndFile);
-        m_sndFile = nullptr;
+void RecordAudio::cleanup()
+{
+    if (file.handle)
+    {
+        sf_close(file.handle);
+        file.handle = nullptr;
     }
-    if (m_pcmHandle) {
-        snd_pcm_close(m_pcmHandle);
-        m_pcmHandle = nullptr;
+    if (alsa.handle)
+    {
+        snd_pcm_close(alsa.handle);
+        alsa.handle = nullptr;
     }
-    if (m_buffer) {
-        free(m_buffer);
-        m_buffer = nullptr;
+    if (alsa.buffer)
+    {
+        free(alsa.buffer);
+        alsa.buffer = nullptr;
     }
-    m_initialized = false;
-    m_recording = false;
+    isInitialized = false;
+    isRecording = false;
 }

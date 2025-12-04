@@ -7,7 +7,6 @@ public:
     TerminalControl();
     ~TerminalControl();
 
-    // Enable raw mode (non-blocking, no echo)
     void setRawMode();
 
     // Reset to original terminal settings
@@ -17,10 +16,9 @@ public:
     // Returns >0 if key is pressed, 0 otherwise
     int kbhit();
 
-    // Get a character (non-blocking if in raw mode)
     int getch();
 
 private:
-    struct termios m_origTermios;
-    bool m_rawModeEnabled;
+    struct termios origTermios;
+    bool rawModeEnabled;
 };

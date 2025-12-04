@@ -4,51 +4,56 @@
 #include <alsa/asoundlib.h>
 #include <sndfile.h>
 
-class RecordAudio {
+struct AudioConfig
+{
+    unsigned int sampleRate;
+    int channels;
+    unsigned int latencyUs;
+};
+
+struct AlsaState
+{
+    snd_pcm_t *handle = nullptr;
+    snd_pcm_uframes_t framesPerPeriod = 0;
+    char *buffer = nullptr;
+    int bufferSize = 0;
+};
+
+struct FileState
+{
+    SNDFILE *handle = nullptr;
+    SF_INFO info = {0};
+    sf_count_t totalFramesWritten = 0;
+};
+
+class RecordAudio
+{
 public:
     RecordAudio();
     ~RecordAudio();
 
-    // Pre-initializes hardware and opens the output file. 
-    // Call this before asking the user to start to ensure instant start.
-    bool initialize(const std::string& filename, 
-                   const std::string& device = "default", 
-                   unsigned int sampleRate = 16000, 
-                   int channels = 1);
+    // Pre-initializes hardware and opens the output file.
+    bool initialize(const std::string &filename,
+                    const std::string &device = "default",
+                    unsigned int sampleRate = 16000,
+                    int channels = 1);
 
     // Prepares the ALSA handle for immediate capture.
     void start();
 
     // Captures a single period (chunk) of audio and writes it to the file.
-    // Returns false if an error occurs.
     bool processLoop();
 
     // Stops the hardware immediately and finalizes the file.
     void stop();
 
-    // Returns the total frames recorded so far.
-    sf_count_t getTotalFrames() const;
-
 private:
-    // Configuration
-    unsigned int m_sampleRate;
-    int m_channels;
-    unsigned int m_latencyUs; // Latency in microseconds
-
-    // ALSA Resources
-    snd_pcm_t *m_pcmHandle;
-    snd_pcm_uframes_t m_framesPerPeriod;
-    char *m_buffer;
-    int m_bufferSize;
-
-    // File Resources
-    SNDFILE *m_sndFile;
-    SF_INFO m_sfInfo;
-    sf_count_t m_totalFramesWritten;
-
-    // State
-    bool m_initialized;
-    bool m_recording;
-    
     void cleanup();
+
+    AudioConfig config;
+    AlsaState alsa;
+    FileState file;
+
+    bool isInitialized;
+    bool isRecording;
 };

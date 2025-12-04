@@ -5,42 +5,41 @@
 #include <sys/select.h>
 #include <iostream>
 
-TerminalControl::TerminalControl() : m_rawModeEnabled(false)
+TerminalControl::TerminalControl() : rawModeEnabled(false)
 {
     // Save the initial state of the terminal immediately on creation
-    tcgetattr(STDIN_FILENO, &m_origTermios);
+    tcgetattr(STDIN_FILENO, &origTermios);
 }
 
 TerminalControl::~TerminalControl()
 {
-    // Ensure terminal is reset when object is destroyed (RAII)
     resetMode();
 }
 
 void TerminalControl::setRawMode()
 {
-    if (m_rawModeEnabled)
+    if (rawModeEnabled)
+    {
         return;
+    }
 
-    // Refresh original attributes before changing (in case they changed externally)
-    tcgetattr(STDIN_FILENO, &m_origTermios);
+    tcgetattr(STDIN_FILENO, &origTermios);
 
     struct termios newTermios;
-    std::memcpy(&newTermios, &m_origTermios, sizeof(newTermios));
+    std::memcpy(&newTermios, &origTermios, sizeof(newTermios));
 
-    // cfmakeraw disables echo and sets non-canonical mode (input available immediately)
     cfmakeraw(&newTermios);
     tcsetattr(STDIN_FILENO, TCSANOW, &newTermios);
-    m_rawModeEnabled = true;
+    rawModeEnabled = true;
 }
 
 void TerminalControl::resetMode()
 {
-    if (!m_rawModeEnabled)
+    if (!rawModeEnabled)
         return;
 
-    tcsetattr(STDIN_FILENO, TCSANOW, &m_origTermios);
-    m_rawModeEnabled = false;
+    tcsetattr(STDIN_FILENO, TCSANOW, &origTermios);
+    rawModeEnabled = false;
 }
 
 int TerminalControl::kbhit()
@@ -49,7 +48,6 @@ int TerminalControl::kbhit()
     fd_set fds;
     FD_ZERO(&fds);
     FD_SET(STDIN_FILENO, &fds);
-    // select returns >0 if input is waiting in the buffer
     return select(1, &fds, NULL, NULL, &tv);
 }
 
@@ -58,6 +56,9 @@ int TerminalControl::getch()
     int r;
     unsigned char c;
     if ((r = read(STDIN_FILENO, &c, sizeof(c))) < 0)
+    {
         return r;
+    }
+    
     return c;
 }

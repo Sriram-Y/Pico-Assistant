@@ -33,8 +33,7 @@ public:
     bool read_humidity();
 
     // LR utilities
-    bool predict_temperature();
-    bool predict_humidity();
+    bool predict_weather(uint8_t cmd);
 
     std::string get_time_tomorrow();
 

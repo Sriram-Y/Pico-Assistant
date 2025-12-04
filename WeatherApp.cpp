@@ -15,7 +15,18 @@ int main(int argc, char *argv[])
     }
 
     const std::string speechCommand = argv[1];
-    std::unique_ptr<WeatherApp> app = std::make_unique<WeatherApp>();
+    std::unique_ptr<WeatherApp> app;
+    try
+    {
+        app = std::make_unique<WeatherApp>();
+    }
+    catch (const std::runtime_error &e)
+    {
+        std::cerr << "Failed to initialize WeatherApp: " << e.what() << std::endl;
+        gpioTerminate();
+        return 1;
+    }
+
     const bool res = app->get_command_result(app->parse_command(speechCommand));
 
     if (!res)
@@ -34,25 +45,15 @@ bool WeatherApp::get_command_result(uint8_t cmd)
     switch (cmd)
     {
     case PREDICT_TEMP_CMD:
-        res = predict_temperature();
-        if (!res)
-        {
-            std::cout << "Failed to predict temperature!" << std::endl;
-            return false;
-        }
-
-        std::cout << "Tempearture on " << ts << " will be: " << static_cast<int>(temperature_) << " C" << std::endl;
-
-        break;
     case PREDICT_HUM_CMD:
-        res = predict_humidity();
+        res = predict_weather(cmd);
         if (!res)
-        {
-            std::cout << "Failed to predict humidity!" << std::endl;
             return false;
-        }
 
-        std::cout << "Humidity on " << ts << " will be: " << static_cast<int>(humidity_) << " %" << std::endl;
+        if (cmd == PREDICT_TEMP_CMD)
+            std::cout << "Tempearture on " << ts << " will be: " << static_cast<int>(temperature_) << " C" << std::endl;
+        else
+            std::cout << "Humidity on " << ts << " will be: " << static_cast<int>(humidity_) << " %" << std::endl;
 
         break;
     case READ_TEMP_CMD:
@@ -92,7 +93,6 @@ uint8_t WeatherApp::parse_command(std::string speechCommand)
     // if "temperature" found in speechCommand return 2
     // if "humidity" found in speechCommand return 3
 
-    // removing spaces for better accuracy?
     speechCommand.erase(std::remove(speechCommand.begin(), speechCommand.end(), ' '), speechCommand.end());
 
     if (speechCommand.find("tomorrow") != std::string::npos &&
@@ -144,20 +144,22 @@ bool WeatherApp::read_humidity()
     return true;
 }
 
-bool WeatherApp::predict_temperature()
-{   
-    const std::string ts = get_time_tomorrow();
-
-    temperature_ = temperatureInference_->predictTemperature(ts);
-    return true;
-}
-
-bool WeatherApp::predict_humidity()
+bool WeatherApp::predict_weather(uint8_t cmd)
 {
     const std::string ts = get_time_tomorrow();
+    if (cmd == PREDICT_TEMP_CMD)
+    {
+        temperature_ = temperatureInference_->predictValue(ts);
+        return true;
+    }
+    else if (cmd == PREDICT_HUM_CMD)
+    {
+        humidity_ = humidityInference_->predictValue(ts);
+        return true;
+    }
 
-    humidity_ = humidityInference_->predictHumidity(ts);
-    return true;
+    std::cout << "Invalid prediction command!" << std::endl;
+    return false;
 }
 
 std::string WeatherApp::get_time_tomorrow()

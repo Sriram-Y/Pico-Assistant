@@ -12,15 +12,12 @@ class WeatherInference
 public:
     WeatherInference(const std::string &model_path);
 
-    float predict(float input_value);
-
-    float preprocessTimestamp(const std::string &timestamp);
-
-    uint8_t predictTemperature(const std::string &timestamp);
-
-    uint8_t predictHumidity(const std::string &timestamp);
+    uint8_t predictValue(const std::string &timestamp);
 
 private:
+    float preprocessTimestamp(const std::string &timestamp);
+    float runInference(float input_value);
+
     std::unique_ptr<tflite::FlatBufferModel> model_;
     std::unique_ptr<tflite::Interpreter> interpreter_;
 

@@ -1,4 +1,0 @@
-temperature
-humidity
-light_on
-weather_query
